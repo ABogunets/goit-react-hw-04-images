@@ -1,4 +1,3 @@
-// import PropTypes from 'prop-types';
 import PropTypes from 'prop-types';
 import { ImageGalleryWrapper } from 'components/ImageGallery/ImageGallery.styled';
 import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
