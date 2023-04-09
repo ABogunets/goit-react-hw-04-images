@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-import { getPics } from 'components/services/pics-api.js';
+import { fetchPics } from 'components/services/pics-api.js';
 
 import { AppWrapper } from './App.styled';
 import { Button } from 'components/Button/Button.styled';
@@ -26,22 +26,26 @@ export const App = () => {
       //first render, fetch is not performed
       return;
     }
-
     setIsLoading(true);
-    getPics(searchQuery, page)
-      .then(data => {
+    const getPics = async () => {
+      try {
+        const { hits, totalHits } = await fetchPics(searchQuery, page);
+
         setPicsSet(prevPicsSet =>
-          page === 1 ? data.hits : [...prevPicsSet, ...data.hits]
+          page === 1 ? hits : [...prevPicsSet, ...hits]
         );
-        setTotalHits(data.totalHits);
-        if (data.hits.length === 0 && page === 1) {
+        setTotalHits(totalHits);
+        if (hits.length === 0 && page === 1) {
           toast.info(`Sorry, no pics on query "${searchQuery}"`);
         }
-      })
-      .catch(error => setError({ error }))
-      .finally(() => {
+      } catch (err) {
+        console.log(err.message);
+        setError('Oops, something went wrong...');
+      } finally {
         setIsLoading(false);
-      });
+      }
+    };
+    getPics();
   }, [searchQuery, page]);
 
   const searchSubmit = searchQuery => {
@@ -65,7 +69,7 @@ export const App = () => {
   return (
     <AppWrapper>
       <Searchbar onSubmit={searchSubmit} />
-      {error && <h2>{error.message}</h2>}
+      {error && <h2>{error}</h2>}
       {picsSet.length > 0 && (
         <ImageGallery items={picsSet} onClick={onImgClick} />
       )}
